@@ -1,0 +1,20 @@
+language: "python"
+python:
+  - "2.7"
+install:
+  pip install flake8
+script:
+  flake8 log_offload
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+deploy:
+  provider: pypi
+  user: rogerthat-platform
+  password:
+    secure: Fd2VcEu1e7+Z64tp7lvzK6SsFOdCuyLinJS2lFP9r6qyl8SKqCleggDaf3eWet18PGXSzFZbOHD+NVMZlZwt80ZD1sCjauC+Md190frT2V8W0NzVjtVe0GSKPgvo9Q0CM0XH+/7hcJJ3HeBisLzHFXMfMr+PHpByS3ePU4WI6UJ1Oo9rIWEWR+XJYmdPKybxo3JrBusK7C2VrvhDmlimlLEe860rsJP2QLuUkP+UGfldYWo0NlFk785jYj+p5drFaJULYuCSLy6/vO3Vrx4CmJDMt8I+a5XDOhxFLYhc7ih29fDABrw1RwtDQhzs0ZMD67RiU83bOYempR+gLCxB+00bewXcoB6jjdDkS99Pimq+KA6Oq2QVLyQM3JPDtvf6FRs40SkrlJnUmgqkIZVwBVZDZvj2C5g5AJkf8ZGsaQI6+TlDa0mRsWtPUE/gKgAJL8umlkvtKbL02HDM9T1iHetuApfIZWu6hBK8C3FFNo7xLr3BXU9iTbGZyZT+VOHkhF18E+PSqQdNHGpS5nO9wmOpQnb1lHZ5dGHtcNFx+gvLDHKE+dpJTtTdKk6Ql2vQRD6EcoDEMqIob98KuPfo6Y2r+79UPdlLqnhsF71d/z6hbQ7rcKzUH7SiQs1Y86iWhwS8GRBq5GfQC6/lw07cOTs05Sehcvzmw8dqiCWPfT8=
+  on:
+    tags: true
+    distributions: sdist bdist_wheel
+    repo: rogerthat-platform/log_offload

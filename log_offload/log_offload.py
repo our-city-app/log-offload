@@ -84,8 +84,8 @@ def _get_bucket_file_handle(bucket, folder_name, application_name):
 
 
 def _fetch_logs(offset):
-    return logservice.fetch(offset=offset, minimum_log_level=logservice.LOG_LEVEL_INFO, include_incomplete=False,
-                            include_app_logs=True, batch_size=logservice.MAX_ITEMS_PER_FETCH)
+    return logservice.fetch(offset=offset, include_incomplete=False, include_app_logs=True,
+                            batch_size=logservice.MAX_ITEMS_PER_FETCH)
 
 
 def export_logs(cloudstorage_bucket, application_name, offload_header, namespace=None, offload_run_key=None):

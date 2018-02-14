@@ -27,11 +27,6 @@ from google.appengine.ext import deferred, ndb
 from consts import OFFLOAD_QUEUE, OFFLOAD_HEADER
 from models import OffloadSettings, OffloadRun
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
-
 
 class LogOffload(object):
     def __init__(self, cloudstorage_bucket, application_name, offload_header=OFFLOAD_HEADER, namespace=None):

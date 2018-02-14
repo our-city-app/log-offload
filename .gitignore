@@ -1,0 +1,8 @@
+.idea/
+dist/
+log_offload.egg-info/
+*.pyc
+.project
+.pydevproject
+.settings
+.DS_Store

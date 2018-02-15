@@ -105,6 +105,8 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
     properties = ['app_id', 'end_time', 'host', 'ip', 'latency', 'status', 'start_time', 'mcycles', 'resource',
                   'response_size', 'user_agent', 'task_queue_name', 'task_name', 'pending_time']
     _gcs_handles = {}
+    start = time.time()
+    done = False
     for request_log in _fetch_logs(offset):
         if offset is None:
             # This is the first request => Store the request id
@@ -113,6 +115,7 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
             offset_settings.put_async()
         elif request_log.request_id == offload_run.until_request_id:
             offload_run_key.delete_async()  # This job is done
+            done = True
             break
         offset = request_log.offset
         request_info = {prop: getattr(request_log, prop) for prop in properties}
@@ -133,5 +136,9 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
             if appLog.message and appLog.message.startswith(offload_header):
                 gcs_file_handle.write(appLog.message[offload_header_length:])
                 gcs_file_handle.write('\n')
+        if time.time() - start > 9 * 60:  # Deferred deadline = 10 minutes
+            break
     for handle in _gcs_handles.itervalues():
         handle.close()
+    if not done:
+        deferred.defer(_export_logs, cloudstorage_bucket, application_name, offload_header, namespace, offload_run_key)

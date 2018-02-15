@@ -36,8 +36,6 @@ class LogOffload(object):
         self.namespace = namespace
 
     def export_logs(self):
-        ndb.delete_multi(OffloadSettings.query(namespace=self.namespace).fetch(None, keys_only=True))
-        ndb.delete_multi(OffloadRun.query(namespace=self.namespace).fetch(None, keys_only=True))
         export_logs(self.cloudstorage_bucket, self.application_name, self.offload_header, self.namespace)
 
     def create_log(self, user, type_, request_data, response_data, function_=None, success=None):

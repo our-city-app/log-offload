@@ -97,6 +97,14 @@ def get_log_datetime(date_obj):
     return datetime(date_obj.year, date_obj.month, date_obj.day, date_obj.hour)
 
 
+def _convert_to_unicode(v):
+    if v is None:
+        return None
+    if isinstance(v, str):
+        return v.decode('utf-8')
+    return v
+
+
 def _export_logs(cloudstorage_bucket, application_name, offload_header, namespace, offload_run_key):
     # type: (unicode, unicode, unicode, ndb.Key) -> None
     offload_header_length = len(offload_header)
@@ -133,7 +141,7 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
         gcs_file_handle.write(json.dumps({'type': '_request', 'data': request_info}))
         gcs_file_handle.write('\n')
         for appLog in request_log.app_logs:
-            if appLog.message and appLog.message.startswith(offload_header):
+            if appLog.message and _convert_to_unicode(appLog.message).startswith(offload_header):
                 gcs_file_handle.write(appLog.message[offload_header_length:])
                 gcs_file_handle.write('\n')
         if time.time() - start > 9 * 60:  # Deferred deadline = 10 minutes

@@ -149,4 +149,5 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
     for handle in _gcs_handles.itervalues():
         handle.close()
     if not done:
-        deferred.defer(_export_logs, cloudstorage_bucket, application_name, offload_header, namespace, offload_run_key)
+        deferred.defer(_export_logs, cloudstorage_bucket, application_name, offload_header, namespace, offload_run_key,
+                       _queue=OFFLOAD_QUEUE)

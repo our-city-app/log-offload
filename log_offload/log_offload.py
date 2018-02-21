@@ -22,6 +22,7 @@ from datetime import datetime
 
 import cloudstorage
 from google.appengine.api.logservice import logservice
+from google.appengine.api.modules import get_versions
 from google.appengine.ext import deferred, ndb
 
 from consts import OFFLOAD_QUEUE, OFFLOAD_HEADER
@@ -77,7 +78,9 @@ def _get_bucket_file_handle(bucket, folder_name, application_name):
 
 
 def _fetch_logs(offset):
-    return logservice.fetch(offset=offset, include_incomplete=False, include_app_logs=True,
+    versions = get_versions()
+    logging.info('Fetching logs with offset %s for versions %s', offset, versions)
+    return logservice.fetch(offset=offset, versions=versions, include_incomplete=False, include_app_logs=True,
                             batch_size=logservice.MAX_ITEMS_PER_FETCH)
 
 
@@ -125,6 +128,7 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
             offload_settings.until_request_id = request_log.request_id
             offload_settings.put()
         elif request_log.request_id == offload_run.until_request_id:
+            logging.info('Log offload complete')
             offload_run_key.delete()  # This job is done
             done = True
             break
@@ -147,12 +151,13 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
             if appLog.message and _convert_to_unicode(appLog.message).startswith(offload_header):
                 gcs_file_handle.write(appLog.message[offload_header_length:])
                 gcs_file_handle.write('\n')
-        # Job will be continued in a new task (task deadline = 10 minutes)
         if time.time() - start > 9 * 60:
+            logging.info('Task deadline approaching, continuing in new task')
             offload_run.offset = offset
             offload_run.put()
             break
     else:
+        logging.info('Initial log offload complete')
         done = True
     for handle in _gcs_handles.itervalues():
         handle.close()

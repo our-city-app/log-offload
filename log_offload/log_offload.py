@@ -80,7 +80,7 @@ def _get_bucket_file_handle(bucket, folder_name, application_name):
 def _fetch_logs(offset):
     versions = get_versions()
     logging.info('Fetching logs with offset %s for versions %s', offset, versions)
-    return logservice.fetch(offset=offset, versions=versions, include_incomplete=False, include_app_logs=True,
+    return logservice.fetch(offset=offset, version_ids=versions, include_incomplete=False, include_app_logs=True,
                             batch_size=logservice.MAX_ITEMS_PER_FETCH)
 
 

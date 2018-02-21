@@ -128,8 +128,6 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
             offload_settings.until_request_id = request_log.request_id
             offload_settings.put()
         elif request_log.request_id == offload_run.until_request_id:
-            logging.info('Log offload complete')
-            offload_run_key.delete()  # This job is done
             done = True
             break
         offset = request_log.offset
@@ -161,6 +159,9 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
         done = True
     for handle in _gcs_handles.itervalues():
         handle.close()
-    if not done:
+    if done:
+        logging.info('Log offload %s complete', offload_run_key)
+        offload_run_key.delete()
+    else:
         deferred.defer(_export_logs, cloudstorage_bucket, application_name, offload_header, namespace, offload_run_key,
                        _queue=OFFLOAD_QUEUE)

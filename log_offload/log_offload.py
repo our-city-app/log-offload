@@ -119,6 +119,9 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
         if offset is None:
             # This is the first request => Store the request id
             offload_settings = OffloadSettings.get_instance(namespace)
+            if offload_run.until_request_id is None:
+                offload_run.until_request_id = request_log.request_id
+                offload_run.put()
             offload_settings.until_request_id = request_log.request_id
             offload_settings.put()
         elif request_log.request_id == offload_run.until_request_id:
@@ -149,6 +152,8 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
             offload_run.offset = offset
             offload_run.put()
             break
+    else:
+        done = True
     for handle in _gcs_handles.itervalues():
         handle.close()
     if not done:

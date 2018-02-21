@@ -118,11 +118,11 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
     for request_log in _fetch_logs(offset):
         if offset is None:
             # This is the first request => Store the request id
-            offset_settings = OffloadSettings.get_instance(namespace)
-            offset_settings.until_request_id = request_log.request_id
-            offset_settings.put_async()
+            offload_settings = OffloadSettings.get_instance(namespace)
+            offload_settings.until_request_id = request_log.request_id
+            offload_settings.put()
         elif request_log.request_id == offload_run.until_request_id:
-            offload_run_key.delete_async()  # This job is done
+            offload_run_key.delete()  # This job is done
             done = True
             break
         offset = request_log.offset
@@ -144,7 +144,10 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
             if appLog.message and _convert_to_unicode(appLog.message).startswith(offload_header):
                 gcs_file_handle.write(appLog.message[offload_header_length:])
                 gcs_file_handle.write('\n')
-        if time.time() - start > 9 * 60:  # Deferred deadline = 10 minutes
+        # Job will be continued in a new task (task deadline = 10 minutes)
+        if time.time() - start > 9 * 60:
+            offload_run.offset = offset
+            offload_run.put()
             break
     for handle in _gcs_handles.itervalues():
         handle.close()

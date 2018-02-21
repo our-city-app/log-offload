@@ -118,15 +118,16 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
     _gcs_handles = {}
     start = time.time()
     done = False
+    to_put = []
     for request_log in _fetch_logs(offset):
         if offset is None:
             # This is the first request => Store the request id
             offload_settings = OffloadSettings.get_instance(namespace)
             if offload_run.until_request_id is None:
                 offload_run.until_request_id = request_log.request_id
-                offload_run.put()
+                to_put.append(offload_run)
             offload_settings.until_request_id = request_log.request_id
-            offload_settings.put()
+            to_put.append(offload_settings)
         elif request_log.request_id == offload_run.until_request_id:
             done = True
             break
@@ -152,13 +153,15 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
         if time.time() - start > 9 * 60:
             logging.info('Task deadline approaching, continuing in new task')
             offload_run.offset = offset
-            offload_run.put()
+            if offload_run not in to_put:
+                to_put.append(offload_run)
             break
     else:
         logging.info('Initial log offload complete')
         done = True
     for handle in _gcs_handles.itervalues():
         handle.close()
+    ndb.put_multi(to_put)
     if done:
         logging.info('Log offload %s complete', offload_run_key)
         offload_run_key.delete()

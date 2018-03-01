@@ -148,6 +148,7 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
             gcs_file_handle.write(json.dumps({'type': '_request', 'data': request_info}))
             gcs_file_handle.write('\n')
         except Exception as e:
+            logging.info('Cannot json encode request: %s', request_info)
             logging.exception(e)
         for appLog in request_log.app_logs:
             if appLog.message and _convert_to_unicode(appLog.message).startswith(offload_header):

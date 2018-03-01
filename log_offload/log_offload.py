@@ -144,14 +144,17 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
         if not gcs_file_handle:
             gcs_file_handle = _get_bucket_file_handle(cloudstorage_bucket, folder_name, application_name)
             _gcs_handles[folder_name] = gcs_file_handle
-        gcs_file_handle.write(json.dumps({'type': '_request', 'data': request_info}))
-        gcs_file_handle.write('\n')
+        try:
+            gcs_file_handle.write(json.dumps({'type': '_request', 'data': request_info}))
+            gcs_file_handle.write('\n')
+        except Exception as e:
+            logging.exception(e)
         for appLog in request_log.app_logs:
             if appLog.message and _convert_to_unicode(appLog.message).startswith(offload_header):
                 gcs_file_handle.write(appLog.message[offload_header_length:])
                 gcs_file_handle.write('\n')
         if time.time() - start > 9 * 60:
-            logging.info('Task deadline approaching, continuing in new task')
+            logging.info('Task deadline approaching, continuing in new task from offset %s', offset)
             offload_run.offset = offset
             if offload_run not in to_put:
                 to_put.append(offload_run)
@@ -159,11 +162,11 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
     else:
         logging.info('Initial log offload complete')
         done = True
+    ndb.put_multi(to_put)
     for handle in _gcs_handles.itervalues():
         handle.close()
-    ndb.put_multi(to_put)
     if done:
-        logging.info('Log offload %s complete', offload_run_key)
+        logging.info('Log offload complete: %s', offload_run)
         offload_run_key.delete()
     else:
         deferred.defer(_export_logs, cloudstorage_bucket, application_name, offload_header, namespace, offload_run_key,

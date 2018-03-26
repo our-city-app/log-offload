@@ -39,13 +39,13 @@ class LogOffload(object):
     def export_logs(self):
         export_logs(self.cloudstorage_bucket, self.application_name, self.offload_header, self.namespace)
 
-    def create_log(self, user, type_, request_data, response_data, function_=None, success=None):
-        # type: (unicode, unicode, dict, dict, unicode, bool) -> None
+    def create_log(self, user, type_, request_data, response_data, function_=None, success=None, timestamp=None):
+        # type: (unicode, unicode, dict, dict, unicode, bool, float) -> None
         data = {
             'type': type_,
             'request_data': request_data,
             'response_data': response_data,
-            'timestamp': time.time()
+            'timestamp': timestamp or time.time()
         }
         try:
             if user is not None:

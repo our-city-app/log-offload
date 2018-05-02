@@ -145,6 +145,9 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
             gcs_file_handle = _get_bucket_file_handle(cloudstorage_bucket, folder_name, application_name)
             _gcs_handles[folder_name] = gcs_file_handle
         try:
+            for key, value in request_info.iteritems():
+                if type(value) is str:
+                    request_info[key] = unicode(value, 'utf-8', 'ignore')
             gcs_file_handle.write(json.dumps({'type': '_request', 'data': request_info}))
             gcs_file_handle.write('\n')
         except Exception as e:

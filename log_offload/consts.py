@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Copyright 2018 Mobicage NV
+# NOTICE: THIS FILE HAS BEEN MODIFIED BY MOBICAGE NV IN ACCORDANCE WITH THE APACHE LICENSE VERSION 2.0
 # Copyright 2018 GIG Technology NV
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# @@license_version:1.4@@
+# @@license_version:1.5@@
 
 OFFLOAD_QUEUE = 'log-offload'
 OFFLOAD_HEADER = u'[OFFLOAD] '

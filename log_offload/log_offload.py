@@ -17,13 +17,12 @@
 #
 # @@license_version:1.5@@
 
+import cloudstorage
 import json
 import logging
 import pprint
 import time
 from datetime import datetime
-
-import cloudstorage
 from google.appengine.api.logservice import logservice
 from google.appengine.api.modules import get_versions
 from google.appengine.ext import deferred, ndb
@@ -112,7 +111,7 @@ def _convert_to_unicode(v):
 
 
 def _export_logs(cloudstorage_bucket, application_name, offload_header, namespace, offload_run_key):
-    # type: (unicode, unicode, unicode, ndb.Key) -> None
+    # type: (unicode, unicode, unicode, unicode, ndb.Key) -> None
     offload_header_length = len(offload_header)
     offload_run = offload_run_key.get()
     offset = offload_run.offset
@@ -121,16 +120,15 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
     _gcs_handles = {}
     start = time.time()
     done = False
-    to_put = []
     for request_log in _fetch_logs(offset):
         if offset is None:
             # This is the first request => Store the request id
             offload_settings = OffloadSettings.get_instance(namespace)
             if offload_run.until_request_id is None:
                 offload_run.until_request_id = request_log.request_id
-                to_put.append(offload_run)
+                offload_run.put()
             offload_settings.until_request_id = request_log.request_id
-            to_put.append(offload_settings)
+            offload_settings.put()
         elif request_log.request_id == offload_run.until_request_id:
             done = True
             break
@@ -163,13 +161,11 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
         if time.time() - start > 9 * 60:
             logging.info('Task deadline approaching, continuing in new task from offset %s', offset)
             offload_run.offset = offset
-            if offload_run not in to_put:
-                to_put.append(offload_run)
+            offload_run.put()
             break
     else:
         logging.info('Initial log offload complete')
         done = True
-    ndb.put_multi(to_put)
     for handle in _gcs_handles.itervalues():
         handle.close()
     if done:

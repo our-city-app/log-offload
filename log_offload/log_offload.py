@@ -159,8 +159,8 @@ def _export_logs(cloudstorage_bucket, application_name, offload_header, namespac
                 gcs_file_handle.write(appLog.message[offload_header_length:])
                 gcs_file_handle.write('\n')
         if time.time() - start > 9 * 60:
-            logging.info('Task deadline approaching, continuing in new task from offset %s', offset)
-            offload_run.offset = offset
+            logging.info('Task deadline approaching, continuing in new task from offset %s', request_log.offset)
+            offload_run.offset = request_log.offset
             offload_run.put()
             break
     else:

@@ -1,5 +1,8 @@
 [![Build Status](https://travis-ci.org/rogerthat-platform/log-offload.svg?branch=master)](https://travis-ci.org/rogerthat-platform/log-offload)
 
-# Offload logs to GCS
 
-When updating your application (uploading a new version), do not delete that version before the logs of it are processed, else the logs for the last hour will not be processed.
+To save the logs to GCS, go to the Google Cloud Platform 'logging' page, and click 'exports'.
+
+ - Create a new 'log export sink'
+ - Assign the 'Storage Object Viewer' permission to the log parsing project's service account
+ - Add the bucket you used for the sink to the log parsing project its config file

@@ -17,5 +17,4 @@
 #
 # @@license_version:1.5@@
 
-OFFLOAD_QUEUE = 'log-offload'
 OFFLOAD_HEADER = u'[OFFLOAD] '

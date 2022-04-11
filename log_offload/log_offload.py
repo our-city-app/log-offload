@@ -22,7 +22,7 @@ import logging
 import pprint
 import time
 
-from consts import OFFLOAD_HEADER
+from .consts import OFFLOAD_HEADER
 
 
 class LogOffload(object):
